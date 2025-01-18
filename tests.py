@@ -1,24 +1,24 @@
 import unittest
-from main import Patient, PatientQueue  # Zakładam, że główny kod jest w pliku patient_queue.py
+from main import Patient, PatientQueue, Gender  # Zakładam, że główny kod jest w pliku patient_queue.py
 
 
 class TestPatient(unittest.TestCase):
 
     def test_patient_initialization(self):
-        patient = Patient("Jan", "Kowalski", 30, "12345678901", "Mężczyzna", "10:30")
+        patient = Patient("Jan", "Kowalski", 30, "12345678901", Gender.M, "10:30")
         self.assertEqual(patient.name, "Jan")
         self.assertEqual(patient.surname, "Kowalski")
         self.assertEqual(patient.age, 30)
         self.assertEqual(patient.pesel, "12345678901")
-        self.assertEqual(patient.gender, "Mężczyzna")
+        self.assertEqual(patient.gender, Gender.M)
         self.assertEqual(patient.time_of_visit, "10:30")
         self.assertIsNone(patient.next_in_line)
 
 
     def setUp(self):
-        self.patient1 = Patient("Anna", "Nowak", 25, "11111111111", "Kobieta", "09:00")
-        self.patient2 = Patient("Anna", "Nowak", 25, "11111111111", "Kobieta", "09:00")
-        self.patient3 = Patient("Piotr", "Kowalski", 35, "22222222222", "Mężczyzna", "10:30")
+        self.patient1 = Patient("Anna", "Nowak", 25, "11111111111", Gender.K, "09:00")
+        self.patient2 = Patient("Anna", "Nowak", 25, "11111111111", Gender.K, "09:00")
+        self.patient3 = Patient("Piotr", "Kowalski", 35, "22222222222", Gender.M, "10:30")
 
     def test_equal_patients(self):
         """Test porównania dwóch identycznych pacjentów."""
@@ -63,138 +63,102 @@ class TestPatient(unittest.TestCase):
         self.assertFalse(self.patient1 == "Some String")
 
 
+import unittest
+from datetime import datetime, timedelta
+
 class TestPatientQueue(unittest.TestCase):
-
     def setUp(self):
+        """
+        Przygotowanie danych testowych przed każdym testem.
+        """
         self.queue = PatientQueue()
-        self.patient1 = Patient("Anna", "Nowak", 25, "11111111111", "Kobieta", "09:00")
-        self.patient2 = Patient("Piotr", "Kowalski", 35, "22222222222", "Mężczyzna", "09:30")
-        self.patient3 = Patient("Maria", "Wiśniewska", 40, "33333333333", "Kobieta", "10:00")
+        self.patient1 = Patient("Anna", "Kowalska", 35, "12345678901", Gender.K, datetime.strptime("10:30", "%H:%M"))
+        self.patient2 = Patient("Jan", "Nowak", 45, "98765432109", Gender.M, datetime.strptime("09:45", "%H:%M"))
+        self.patient3 = Patient("Zofia", "Wiśniewska", 28, "56789012345", Gender.K, datetime.strptime("11:15", "%H:%M"))
 
-
-    def test_add_patient_to_empty_queue(self):
-        self.queue.add_patient(self.patient1)
-        self.assertEqual(self.queue.head, self.patient1)
-
-    def test_add_patient_to_non_empty_queue(self):
+    def test_add_patient(self):
+        """
+        Test dodawania pacjenta do kolejki.
+        """
         self.queue.add_patient(self.patient1)
         self.queue.add_patient(self.patient2)
-        self.assertEqual(self.queue.head.next_in_line, self.patient2)
+        self.assertEqual(self.queue.heap[0], self.patient2)  # Pacjent o wcześniejszej godzinie powinien być pierwszy
+        self.assertEqual(len(self.queue.heap), 2)  # Długość kolejki powinna wynosić 2
 
-    def test_display_queue(self):
+    def test_get_next_patient(self):
+        """
+        Test pobierania pacjenta o najwyższym priorytecie.
+        """
         self.queue.add_patient(self.patient1)
         self.queue.add_patient(self.patient2)
-        self.queue.add_patient(self.patient3)
-        with self.assertLogs(level="INFO") as log:
-            self.queue.display_queue()
-        self.assertIn("Imię: Anna", log.output[0])
-        self.assertIn("Imię: Piotr", log.output[1])
-        self.assertIn("Imię: Maria", log.output[2])
+        next_patient = self.queue.get_next_patient()
+        self.assertEqual(next_patient, self.patient2)  # Pacjent z godz. 09:45 powinien być pierwszy
+        self.assertEqual(len(self.queue.heap), 1)  # Długość kolejki zmniejszona o 1
 
-    def test_insert_patient_at_beginning(self):
+    def test_is_empty(self):
+        """
+        Test sprawdzania, czy kolejka jest pusta.
+        """
+        self.assertTrue(self.queue.is_empty())  # Początkowo kolejka powinna być pusta
         self.queue.add_patient(self.patient1)
-        self.queue.insert_patient(self.patient2, 0)
-        self.assertEqual(self.queue.head, self.patient2)
+        self.assertFalse(self.queue.is_empty())  # Po dodaniu pacjenta kolejka nie jest pusta
 
-    def test_insert_patient_in_middle(self):
-        self.queue.add_patient(self.patient1)
-        self.queue.add_patient(self.patient3)
-        self.queue.insert_patient(self.patient2, 1)
-        self.assertEqual(self.queue.head.next_in_line, self.patient2)
-        self.assertEqual(self.queue.head.next_in_line.next_in_line, self.patient3)
-
-    def test_insert_patient_at_end(self):
+    def test_insert_patient_with_time(self):
+        """
+        Test wstawiania pacjenta priorytetowego z określonym czasem.
+        """
         self.queue.add_patient(self.patient1)
         self.queue.add_patient(self.patient2)
-        self.queue.insert_patient(self.patient3, 3)
-        self.assertEqual(self.queue.head.next_in_line.next_in_line, self.patient3)
+        patient_priority = Patient("Krzysztof", "Kowalczyk", 50, "12312312312", Gender.M, datetime.strptime("10:00", "%H:%M"))
+        self.queue.insert_patient(patient_priority, 1)
+        self.assertEqual(self.queue.heap[0], self.patient2)  # Pacjent z godz. 09:45 powinien pozostać pierwszy
+        self.assertIn(patient_priority, self.queue.heap)  # Pacjent priorytetowy powinien być w kolejce
 
-    def test_remove_patient_from_beginning(self):
+    def test_insert_patient_without_time(self):
+        """
+        Test wstawiania pacjenta priorytetowego bez określonego czasu.
+        """
         self.queue.add_patient(self.patient1)
         self.queue.add_patient(self.patient2)
-        self.queue.remove_patient()
-        self.assertEqual(self.queue.head, self.patient2)
+        patient_priority = Patient("Krzysztof", "Kowalczyk", 50, "12312312312", Gender.M, None)
+        self.queue.insert_patient(patient_priority, 1)
+        self.assertIsNotNone(patient_priority.time_of_visit)  # Czas wizyty powinien zostać nadany
+        self.assertIn(patient_priority, self.queue.heap)  # Pacjent priorytetowy powinien być w kolejce
 
-    def test_remove_patient_from_middle(self):
+    def test_remove_patient(self):
+        """
+        Test usuwania pacjenta z kolejki.
+        """
         self.queue.add_patient(self.patient1)
         self.queue.add_patient(self.patient2)
-        self.queue.add_patient(self.patient3)
-        self.queue.remove_patient(1)
-        self.assertEqual(self.queue.head.next_in_line, self.patient3)
+        self.queue.remove_patient(0)
+        self.assertNotIn(self.patient2, self.queue.heap)  # Pacjent na pozycji 0 powinien być usunięty
+        self.assertEqual(len(self.queue.heap), 1)  # Długość kolejki zmniejszona o 1
 
-    def test_remove_patient_from_end(self):
-        self.queue.add_patient(self.patient1)
-        self.queue.add_patient(self.patient2)
-        self.queue.add_patient(self.patient3)
-        self.queue.remove_patient(2)
-        self.assertIsNone(self.queue.head.next_in_line.next_in_line)
-
-    def test_remove_patient_from_empty_queue(self):
+    def test_remove_patient_empty_queue(self):
+        """
+        Test usuwania pacjenta z pustej kolejki.
+        """
         with self.assertLogs(level="INFO") as log:
             self.queue.remove_patient()
-        self.assertIn("Kolejka jest pusta", log.output[0])
+            self.assertIn("Nie ma pacjenta, którego można usunąć", log.output[-1])
 
-    def test_display_empty_queue(self):
+    def test_invalid_position_insert_patient(self):
+        """
+        Test wstawiania pacjenta na niepoprawną pozycję.
+        """
         with self.assertLogs(level="INFO") as log:
-            self.queue.display_queue()
-        self.assertIn("Kolejka jest pusta", log.output[0])
+            patient_priority = Patient("Krzysztof", "Kowalczyk", 50, "12312312312", Gender.M, None)
+            self.queue.insert_patient(patient_priority, -1)  # Niepoprawna pozycja
+            self.assertIn("Niewłaściwa pozycja", log.output[-1])
 
-    def test_insert_patient_in_empty_queue(self):
-        self.queue.insert_patient(self.patient1, 0)
-        self.assertEqual(self.queue.head, self.patient1)
-
-    def test_insert_patient_out_of_bounds(self):
-        self.queue.add_patient(self.patient1)
-        self.queue.add_patient(self.patient2)
-        self.queue.insert_patient(self.patient3, 10)  # Wstaw na pozycję większą niż rozmiar kolejki
-        self.assertEqual(self.queue.head.next_in_line.next_in_line, self.patient3)  # Pacjent trafia na koniec kolejki
-
-    def test_remove_patient_out_of_bounds(self):
-        self.queue.add_patient(self.patient1)
-        self.queue.add_patient(self.patient2)
-        self.queue.remove_patient(5)  # Próba usunięcia pacjenta z pozycji, która nie istnieje
-        self.assertEqual(self.queue.head, self.patient1)
-        self.assertEqual(self.queue.head.next_in_line, self.patient2)
-
-    def test_add_patient_with_edge_values(self):
-        patient = Patient("", "", 0, "00000000000", "Nieznana", "00:00")
-        self.queue.add_patient(patient)
-        self.assertEqual(self.queue.head, patient)
-        self.assertEqual(self.queue.head.name, "")
-        self.assertEqual(self.queue.head.surname, "")
-        self.assertEqual(self.queue.head.age, 0)
-        self.assertEqual(self.queue.head.pesel, "00000000000")
-        self.assertEqual(self.queue.head.gender, "Nieznana")
-        self.assertEqual(self.queue.head.time_of_visit, "00:00")
-
-    def test_remove_only_patient(self):
-        self.queue.add_patient(self.patient1)
-        self.queue.remove_patient()
-        self.assertIsNone(self.queue.head)
-
-    def test_insert_patient_before_only_patient(self):
-        self.queue.add_patient(self.patient1)
-        self.queue.insert_patient(self.patient2, 0)
-        self.assertEqual(self.queue.head, self.patient2)
-        self.assertEqual(self.queue.head.next_in_line, self.patient1)
-
-    def test_insert_patient_after_only_patient(self):
-        self.queue.add_patient(self.patient1)
-        self.queue.insert_patient(self.patient2, 1)
-        self.assertEqual(self.queue.head, self.patient1)
-        self.assertEqual(self.queue.head.next_in_line, self.patient2)
-
-    def test_large_queue(self):
-        for i in range(1000):
-            self.queue.add_patient(Patient(f"Name{i}", f"Surname{i}", i, str(i).zfill(11), "Mężczyzna", "12:00"))
-
-        self.assertEqual(self.queue.head.name, "Name0")
-        current = self.queue.head
-        count = 0
-        while current is not None:
-            count += 1
-            current = current.next_in_line
-        self.assertEqual(count, 1000)
+    def test_get_next_patient_empty_queue(self):
+        """
+        Test pobierania pacjenta z pustej kolejki.
+        """
+        with self.assertLogs(level="INFO") as log:
+            self.queue.get_next_patient()
+            self.assertIn("Wszyscy pacjenci zostali zbadani", log.output[-1])
 
 
 if __name__ == "__main__":
