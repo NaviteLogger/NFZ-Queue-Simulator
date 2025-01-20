@@ -1,0 +1,14 @@
+networks:
+  default:
+    external: true
+    name: future-devs
+services:
+  app:
+    ports:
+      - 10000:10000
+    build:
+      context: .
+      dockerfile: Dockerfile
+    labels:
+      - traefik.enable=true
+      - subdomain=aisd
