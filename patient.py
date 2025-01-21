@@ -110,13 +110,20 @@ class PatientQueue:
         :return: Zwraca true, kiedy żaden inny pacjent nie ma takiego samego numeru PESEL i kiedy odstęp od poprzedniej wizyty jest przynajmniej 10 minut.
         """
         if len(self.heap) > 0:
-            for patient_in_queue in self.heap:
-                if patient_in_queue.pesel == patient.pesel:
-                    raise ValueError("Jest w kolejce pacjent o podanym numerze PESEL")
-                elif abs(patient_in_queue.time_of_visit - patient.time_of_visit) < timedelta(0,600):
-                    raise ValueError("Odstęp pomiędzy umówionymi wizytami to minimum 10 minut")
+            if patient.time_of_visit is not  None:
+                for patient_in_queue in self.heap:
+                    if patient_in_queue.pesel == patient.pesel:
+                        raise ValueError("Jest w kolejce pacjent o podanym numerze PESEL")
+                    elif abs(patient_in_queue.time_of_visit - patient.time_of_visit) < timedelta(minutes=10):
+                        raise ValueError("Odstęp pomiędzy umówionymi wizytami to minimum 10 minut")
+                return True
+            else:
+                for patient_in_queue in self.heap:
+                    if patient_in_queue.pesel == patient.pesel:
+                        raise ValueError("Jest w kolejce pacjent o podanym numerze PESEL")
+                return True
+        elif patient is not None:
             return True
-        elif patient is not  None: return True
         else: return False
 
     def add_patient(self, patient):
@@ -209,7 +216,7 @@ class PatientQueue:
             print("Niewłaściwa pozycja")
             logging.info("Niewłaściwa pozycja")
             return
-        if not patient.time_of_visit:
+        if self.validating_addition(patient):
             if 0 < position < len(self.heap):
                 prev_time = self.heap[position - 1].time_of_visit
                 next_time = self.heap[position].time_of_visit
