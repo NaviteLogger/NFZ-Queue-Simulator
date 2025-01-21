@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Queue Management</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: auto;
+        }
+
+        form {
+            margin-bottom: 20px;
+        }
+
+        form div {
+            margin-bottom: 10px;
+        }
+
+        label {
+            display: inline-block;
+            width: 120px;
+        }
+
+        input,
+        select,
+        button {
+            padding: 5px;
+            font-size: 14px;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        li {
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+
+        .error,
+        .success {
+            color: white;
+            padding: 10px;
+            margin-bottom: 20px;
+        }
+
+        .error {
+            background-color: #f44336;
+        }
+
+        .success {
+            background-color: #4caf50;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Patient Queue Management</h1>
+        <div id="alerts"></div>
+
+        <h2>Add New Patient</h2>
+        <form id="addPatientForm">
+            <div>
+                <label for="name">Imię:</label>
+                <input type="text" id="name" required>
+            </div>
+            <div>
+                <label for="surname">Nazwisko:</label>
+                <input type="text" id="surname" required>
+            </div>
+            <div>
+                <label for="age">Wiek:</label>
+                <input type="number" id="age" required>
+            </div>
+            <div>
+                <label for="pesel">PESEL:</label>
+                <input type="text" id="pesel" required>
+            </div>
+            <div>
+                <label for="gender">Płeć:</label>
+                <select id="gender" required>
+                    <option value="Kobieta">Kobieta</option>
+                    <option value="Mężczyzna">Mężczyzna</option>
+                </select>
+            </div>
+            <div>
+                <label for="time_of_visit">Godzina wizyty:</label>
+                <input type="time" id="time_of_visit" required>
+            </div>
+            <button type="submit">Add Patient</button>
+        </form>
+
+        <h2>Patient Queue</h2>
+        <ul id="patientQueue"></ul>
+        <button id="removePatient">Remove Next Patient</button>
+
+        <h2>Insert Patient at Specific Position</h2>
+        <form id="insertPatientForm">
+            <div>
+                <label for="insert_name">Imię:</label>
+                <input type="text" id="insert_name" required>
+            </div>
+            <div>
+                <label for="insert_surname">Nazwisko:</label>
+                <input type="text" id="insert_surname" required>
+            </div>
+            <div>
+                <label for="insert_age">Wiek:</label>
+                <input type="number" id="insert_age" required>
+            </div>
+            <div>
+                <label for="insert_pesel">PESEL:</label>
+                <input type="text" id="insert_pesel" required>
+            </div>
+            <div>
+                <label for="insert_gender">Płeć:</label>
+                <select id="insert_gender" required>
+                    <option value="Kobieta">Kobieta</option>
+                    <option value="Mężczyzna">Mężczyzna</option>
+                </select>
+            </div>
+            <div>
+                <label for="insert_position">Pozycja:</label>
+                <input type="number" id="insert_position" min="0" required>
+            </div>
+            <button type="submit">Insert Patient</button>
+        </form>
+
+    </div>
+
+
+    <script>
+        const alerts = document.getElementById("alerts");
+        const patientQueue = document.getElementById("patientQueue");
+
+        // Display an alert
+        function showAlert(message, type) {
+            alerts.innerHTML = `<div class="${type}">${message}</div>`;
+            setTimeout(() => alerts.innerHTML = "", 3000);
+        }
+
+        // Fetch and display patients with their index
+        async function fetchPatients() {
+            const response = await fetch('/api/patients');
+            const patients = await response.json();
+            patientQueue.innerHTML = patients.map(patient => `
+                <li>
+                    <strong>${patient.index + 1}. ${patient.name} ${patient.surname}</strong><br>
+                    Age: ${patient.age}, PESEL: ${patient.pesel}<br>
+                    Gender: ${patient.gender}, Time: ${patient.time_of_visit}
+                </li>
+            `).join('');
+        }
+
+        // Add a new patient
+        document.getElementById("addPatientForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const formData = {
+                name: document.getElementById("name").value,
+                surname: document.getElementById("surname").value,
+                age: document.getElementById("age").value,
+                pesel: document.getElementById("pesel").value,
+                gender: document.getElementById("gender").value,
+                time_of_visit: document.getElementById("time_of_visit").value,
+            };
+            const response = await fetch("/api/patient", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(formData),
+            });
+            const result = await response.json();
+            if (response.ok) {
+                showAlert(result.message, "success");
+                fetchPatients();
+            } else {
+                showAlert(result.error, "error");
+            }
+        });
+
+        // Add a new patient
+        document.getElementById("insertPatientForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            // Check the length of the queue
+            const lengthResponse = await fetch('/api/queue/length');
+            const lengthResult = await lengthResponse.json();
+
+            if (document.getElementById("insert_position").value > lengthResult.length + 1) {
+                document.getElementById("insert_position").value = lengthResult.length + 1;
+            }
+
+            const formData = {
+                name: document.getElementById("insert_name").value,
+                surname: document.getElementById("insert_surname").value,
+                age: document.getElementById("insert_age").value,
+                pesel: document.getElementById("insert_pesel").value,
+                gender: document.getElementById("insert_gender").value,
+                position: document.getElementById("insert_position").value,
+            };
+            const response = await fetch('/api/patient/insert', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData),
+            });
+            const result = await response.json();
+            if (response.ok) {
+                showAlert(result.message, "success");
+                fetchPatients(); // Refresh queue
+            } else {
+                showAlert(result.error, "error");
+            }
+        });
+
+        // Remove the next patient
+        document.getElementById("removePatient").addEventListener("click", async () => {
+            const response = await fetch('/api/patient', { method: 'DELETE' });
+            const result = await response.json();
+            if (response.ok) {
+                showAlert(result.message, "success");
+                fetchPatients();
+            } else {
+                showAlert(result.error, "error");
+            }
+        });
+
+        // Initial fetch
+        fetchPatients();
+    </script>
+</body>
+
+</html>
