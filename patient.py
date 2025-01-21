@@ -2,6 +2,7 @@
 Projekt na laboratorium przedmiotu Algorytmy i Struktury Danych.
 """
 import logging
+import time
 from datetime import datetime, timedelta
 from enum import Enum
 
@@ -234,6 +235,16 @@ class PatientQueue:
             logging.info("Nie ma pacjenta, którego można usunąć")
         else:
             self.heap.pop(position)
+
+    def waiting_inline(self):
+        """
+        Długo wyczekiwana funkcja odzwierciedlająca oczekiwanie na przyjęcie do lekarza.
+        :return: Nic nie zwraca po prostu czekasz... tak w nieskończoność
+        """
+        while True:
+            print("Trwa oczekiwanie na wolne terminy")
+            logging.info("Trwa czekanie na wolne terminy")
+            time.sleep(5)
 
 
 def create_patient() -> Patient | None:
