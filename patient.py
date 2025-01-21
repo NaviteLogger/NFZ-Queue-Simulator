@@ -109,15 +109,15 @@ class PatientQueue:
         odstępie niż 10 minut od poprzedniej wizyty.
         :return: Zwraca true, kiedy żaden inny pacjent nie ma takiego samego numeru PESEL i kiedy odstęp od poprzedniej wizyty jest przynajmniej 10 minut.
         """
-        if patient is not None:
-            if len(self.heap) > 0:
-                for patient_in_queue in self.heap:
-                    if patient_in_queue.pesel == patient.pesel:
-                        raise ValueError("Jest w kolejce pacjent o podanym numerze PESEL")
-                    elif abs(patient_in_queue.time_of_visit - patient.time_of_visit) < 10:
-                        raise ValueError("Odstęp pomiędzy umówionymi wizytami to minimum 10 minut")
-                return True
-        raise  Exception("Do pacjenta przekazano None")
+        if len(self.heap) > 0:
+            for patient_in_queue in self.heap:
+                if patient_in_queue.pesel == patient.pesel:
+                    raise ValueError("Jest w kolejce pacjent o podanym numerze PESEL")
+                elif abs(patient_in_queue.time_of_visit - patient.time_of_visit) < timedelta(0,600):
+                    raise ValueError("Odstęp pomiędzy umówionymi wizytami to minimum 10 minut")
+            return True
+        elif patient is not  None: return True
+        else: return False
 
     def add_patient(self, patient):
         """
