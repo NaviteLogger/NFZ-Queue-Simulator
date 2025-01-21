@@ -29,26 +29,47 @@ class Patient:
         """
         Konstruktor tworzący instancje obiektu, jakim jest pacjent.
 
-        :param name: To string przechowujący imię pacjenta.
-        :param surname: To string przechowujący nazwisko pacjenta.
-        :param age: To liczba całkowita przechowująca wiek pacjenta.
-        :param pesel: To string przechowujący unikalne ID pacjenta.
-        :param gender: To string mówiący o tym, jakiej płci jest pacjent.
-        :param time_of_visit: To godzina o, której miał pacjent umówioną wizytę.
+        :param name: Imię pacjenta (ciąg liter zaczynający się dużą literą).
+        :param surname: Nazwisko pacjenta (ciąg liter zaczynający się dużą literą).
+        :param age: Wiek pacjenta (liczba całkowita z zakresu 1-150).
+        :param pesel: Unikalny PESEL pacjenta.
+        :param gender: Płeć pacjenta (Gender Enum: Kobieta lub Mężczyzna).
+        :param time_of_visit: Godzina wizyty pacjenta (obiekt datetime lub None).
         """
-        if not isinstance(gender, Gender):
-            raise Exception("Płeć to musi być 'Kobieta' lub  'Mężczyzna'")
-        self.name = name
-        self.surname = surname
+        # Walidacja imienia
+        if not name.isalpha():
+            raise ValueError("Imię może zawierać tylko litery.")
+        self.name = name.capitalize()
+
+        # Walidacja nazwiska
+        if not surname.isalpha():
+            raise ValueError("Nazwisko może zawierać tylko litery.")
+        self.surname = surname.capitalize()
+
+        # Walidacja wieku
+        if not (1 <= age <= 150):
+            raise ValueError("Wiek musi być liczbą całkowitą z zakresu 1-150.")
         self.age = age
+
+        # Walidacja PESEL
+        if not isinstance(pesel, int) or len(str(pesel)) != 11:
+            raise ValueError("PESEL musi być liczbą całkowitą składającą się z 11 cyfr.")
         self.pesel = pesel
+
+        # Walidacja płci
+        if not isinstance(gender, Gender):
+            raise ValueError("Płeć musi być wartością Gender Enum: 'Kobieta' lub 'Mężczyzna'.")
         self.gender = gender
+
+        # Czas wizyty (może być None)
         self.time_of_visit = time_of_visit
 
-        self. next_in_line = None
-
-    # Comparision methods
     def __eq__(self, other):
+        """
+        Funkcja porównująca obiekty do pacjenta. Zwraca true, jeśli wszystkie pola mają tę samą wartość.
+        :param other: To parametr przechowujący informacje o porównywanym obiekcie do tego pacjenta.
+        :return:
+        """
         if not isinstance(other, Patient):
             return False
         return (self.name == other.name and
@@ -80,11 +101,29 @@ class PatientQueue:
     def __init__(self):
         self.heap = []
 
+    def validating_addition(self, patient):
+        """
+        Funkcja sprawdzająca, czy nie ma w kolejce pacjenta o takim samym numerze PESEL i czy osoba umawiająca
+        się nie próbuje się umówić na tę samą godzinę co inny pacjent. Nie pozwoli umówić się również w mniejszym
+        odstępie niż 10 minut od poprzedniej wizyty.
+        :return: Zwraca true, kiedy żaden inny pacjent nie ma takiego samego numeru PESEL i kiedy odstęp od poprzedniej wizyty jest przynajmniej 10 minut.
+        """
+        if patient is not None:
+            if len(self.heap) > 0:
+                for patient_in_queue in self.heap:
+                    if patient_in_queue.pesel == patient.pesel:
+                        raise ValueError("Jest w kolejce pacjent o podanym numerze PESEL")
+                    elif abs(patient_in_queue.time_of_visit - patient.time_of_visit) < 10:
+                        raise ValueError("Odstęp pomiędzy umówionymi wizytami to minimum 10 minut")
+                return True
+        raise  Exception("Do pacjenta przekazano None")
+
     def add_patient(self, patient):
         """
         Dodaje pacjenta do kopca i przywraca porządek kopca minimalnego.
         """
-        self.heap.append(patient)
+        if self.validating_addition(patient):
+            self.heap.append(patient)
         self._build_heap()
 
     def get_next_patient(self):
@@ -135,16 +174,25 @@ class PatientQueue:
 
     def display_queue(self):
         """
-        Funkcja wyświetlająca dane pacjentów z kolejki
+        Funkcja wyświetlająca dane pacjentów z kolejki w kolejności czasu wizyty.
         :return: None
         """
         if len(self.heap) == 0:
             print("Kolejka jest pusta")
-            logging.log(1, "Kolejka jest pusta")
+            logging.info("Kolejka jest pusta")
         else:
-            for patient in self.heap:
+            temp_heap = self.heap[:]
+            sorted_patients = []
+
+            while temp_heap:
+                temp_heap[0], temp_heap[-1] = temp_heap[-1], temp_heap[0]
+                sorted_patients.append(temp_heap.pop())
+                self._heapify_min(len(temp_heap), 0)
+
+            # Wyświetl pacjentów w kolejności priorytetu
+            for patient in sorted_patients:
                 patient.display()
-                logging.info(patient.display())
+                logging.info(f"Pacjent: {patient.name} {patient.surname}, Wizyta: {patient.time_of_visit}")
 
     def insert_patient(self, patient, position):
         """
@@ -167,12 +215,11 @@ class PatientQueue:
                 patient.time_of_visit = prev_time + (next_time - prev_time) / 2
             elif position == 0:
                 patient.time_of_visit = self.heap[0].time_of_visit - \
-                    timedelta(minutes=1)
+                    timedelta(minutes=10)
             else:
                 patient.time_of_visit = self.heap[-1].time_of_visit + \
-                    timedelta(minutes=1)
+                    timedelta(minutes=10)
 
-        # Wstawienie pacjenta na określoną pozycję
         self.heap.insert(position, patient)
         self._build_heap()
 
@@ -189,7 +236,7 @@ class PatientQueue:
             self.heap.pop(position)
 
 
-def create_patient() -> Patient | None:  # To trzeba będzie uodpornić na idiotów! O ile chcemy tę funkcję
+def create_patient() -> Patient | None:
     """
     Funkcja tworząca pacjenta za pomocą danych podanych z klawiatury.
     :return: Patient
