@@ -191,6 +191,33 @@ class PatientQueue:
         Funkcja wyświetlająca dane pacjentów z kolejki w kolejności czasu wizyty.
         :return: Zwraca posortowaną tablicę pacjentów
         """
+
+        def _build_heap_for_display(array):
+            """
+            Buduje kopiec minimalny z listy.
+            """
+            n = len(array)
+            for i in range(n // 2 - 1, -1, -1):
+                _heapify_min_for_display(array,n, i)
+
+        def _heapify_min_for_display(array, n, i):
+            """
+            Funkcja odpowiedzialna za tworzenie kopca minimalnego.
+            :param n: To długość danych wejściowych, z jakiej będzie zrobiony kopiec.
+            :param i: To miejsce, od którego przywracamy porządek kopca minimalnego.
+            """
+            smallest = i  # indeks najmniejszego elementu, na początku 0
+            left_child = 2 * i + 1  # lewy potomek, badanego węzła
+            right_child = 2 * i + 2  # prawy potomek, badanego węzła
+
+            if left_child < n and array[left_child].time_of_visit < array[smallest].time_of_visit:
+                smallest = left_child
+            if right_child < n and array[right_child].time_of_visit < array[smallest].time_of_visit:
+                smallest = right_child
+            if smallest != i:
+                array[i], array[smallest] = array[smallest], array[i]
+                _heapify_min_for_display(array,len(array), smallest)
+
         if len(self.heap) == 0:
             raise Exception("Kolejka jest pusta")
         else:
@@ -200,7 +227,7 @@ class PatientQueue:
             while temp_heap:
                 temp_heap[0], temp_heap[-1] = temp_heap[-1], temp_heap[0]
                 sorted_patients.append(temp_heap.pop())
-                self._heapify_min(len(temp_heap), 0)
+                _heapify_min_for_display(temp_heap,len(temp_heap),0)
 
             return sorted_patients
 
