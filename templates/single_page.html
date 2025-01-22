@@ -287,7 +287,9 @@
         // Display an alert
         function showAlert(message, type) {
             alerts.innerHTML = `<div class="${type}">${message}</div>`;
-            setTimeout(() => alerts.innerHTML = "", 3000);
+            setTimeout(() => {
+                ;
+            }, 6000);
         }
 
         // Fetch and display patients with their index

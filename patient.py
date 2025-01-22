@@ -223,7 +223,7 @@ class PatientQueue:
 
             return sorted_patients
 
-    def insert_patient(self, patient, position):
+    def insert_patient(self, patient: Patient, position: int):
         """
          Wstawia pacjenta priorytetowego w określone miejsce w kolejce.
          Jeśli pacjent nie ma określonej godziny wizyty, ustala ją na podstawie
@@ -241,7 +241,14 @@ class PatientQueue:
             if 0 < position < len(self.heap):
                 prev_time = self.heap[position - 1].time_of_visit
                 next_time = self.heap[position].time_of_visit
-                patient.time_of_visit = prev_time + (next_time - prev_time) / 2
+                delta_time = prev_time + (next_time - prev_time) / 2
+
+                # Ensure minimum 10-minute interval from both neighbors
+                if (delta_time - prev_time < timedelta(minutes=10)) or (next_time - delta_time < timedelta(minutes=10)):
+                    raise ValueError(
+                        "Odstęp pomiędzy umówionymi wizytami to minimum 10 minut.")
+
+                patient.time_of_visit = delta_time
             elif position == 0:
                 patient.time_of_visit = self.heap[0].time_of_visit - \
                     timedelta(minutes=10)
