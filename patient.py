@@ -183,11 +183,10 @@ class PatientQueue:
     def display_queue(self):
         """
         Funkcja wyświetlająca dane pacjentów z kolejki w kolejności czasu wizyty.
-        :return: None
+        :return: Zwraca posortowaną tablicę pacjentów
         """
         if len(self.heap) == 0:
-            print("Kolejka jest pusta")
-            logging.info("Kolejka jest pusta")
+            raise Exception("Kolejka jest pusta")
         else:
             temp_heap = self.heap[:]
             sorted_patients = []
@@ -197,10 +196,7 @@ class PatientQueue:
                 sorted_patients.append(temp_heap.pop())
                 self._heapify_min(len(temp_heap), 0)
 
-            # Wyświetl pacjentów w kolejności priorytetu
-            for patient in sorted_patients:
-                patient.display()
-                logging.info(f"Pacjent: {patient.name} {patient.surname}, Wizyta: {patient.time_of_visit}")
+            return sorted_patients
 
     def insert_patient(self, patient, position):
         """
