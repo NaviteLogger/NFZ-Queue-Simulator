@@ -133,7 +133,7 @@
         }
 
         .error {
-            font-size:15px;
+            font-size: 15px;
             text-align: center;
             background-color: #f44336;
             color: white;
@@ -141,7 +141,7 @@
         }
 
         .success {
-            font-size:15px;
+            font-size: 15px;
             text-align: center;
             background-color: #4caf50;
             color: white;
@@ -210,6 +210,9 @@
             </div>
             <button type="submit">Add Patient</button>
         </form>
+        <div>
+            <button id="randomPatientDatae">Random Patient Data</button>
+        </div>
 
         <!-- Insert Patient Form -->
         <form id="insertPatientForm">
@@ -270,7 +273,7 @@
                 document.getElementById("insertMenuButton").classList.add("active");
             }
         }
-         const alerts = document.getElementById("alerts");
+        const alerts = document.getElementById("alerts");
         const patientQueue = document.getElementById("patientQueue");
 
         // Display an alert
@@ -291,6 +294,19 @@
                 </li>
             `).join('');
         }
+
+        // Random patient data
+        document.getElementById("randomPatientDatae").addEventListener("click", async () => {
+            const response = await fetch('/api/random-patient');
+            const data = await response.json();
+            const patient = data;
+            document.getElementById("name").value = patient.name;
+            document.getElementById("surname").value = patient.surname;
+            document.getElementById("age").value = patient.age;
+            document.getElementById("gender").value = patient.gender;
+            document.getElementById("pesel").value = patient.pesel;
+            document.getElementById("time_of_visit").value = patient.time_of_visit;
+        });
 
         // Add a new patient
         document.getElementById("addPatientForm").addEventListener("submit", async (e) => {
