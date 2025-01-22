@@ -108,7 +108,7 @@ class PatientQueue:
         """
         Funkcja sprawdzająca, czy nie ma w kolejce pacjenta o takim samym numerze PESEL i czy osoba umawiająca
         się nie próbuje się umówić na tę samą godzinę co inny pacjent. Nie pozwoli umówić się również w mniejszym
-        odstępie niż 10 minut od poprzedniej wizyty.
+        odstępie niż 10 minut od poprzedniej wizyty. (Wyjątek, to pacjent z priorytetem pozycji)
         :return: Zwraca true, kiedy żaden inny pacjent nie ma takiego samego numeru PESEL i kiedy odstęp od poprzedniej wizyty jest przynajmniej 10 minut.
         """
         if len(self.heap) > 0:
