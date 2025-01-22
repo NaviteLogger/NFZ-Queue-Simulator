@@ -79,6 +79,7 @@
             border-radius: 5px;
             cursor: pointer;
             transition: background-color 0.3s;
+            margin-bottom:3px;
         }
 
         button:hover {
@@ -164,12 +165,31 @@
             display: block;
             margin: 20px auto 0;
         }
+        .spinner {
+    margin: 0 auto;
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #007bff;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
     </style>
 </head>
 
 <body>
     <div class="container">
-        <h1>Patient Queue Management</h1>
+        <h1>NFZ Queue Simulator</h1>
 
 
         <!-- Menu -->
@@ -249,6 +269,13 @@
         </div>
         <div>
             <button id="randomInsertPatientData">Random Insert Patient Data</button>
+        </div>
+        <div>
+            <button id="findNfzVisits">Search for NFZ Visits</button>
+        </div>
+        <div id="loadingAnimation" style="display: none; text-align: center; margin-top: 20px;">
+            <div class="spinner"></div>
+            <p>Searching for available visits for NFZ...</p>
         </div>
         <!-- Patient Queue -->
         <div class="queue-container">
@@ -412,6 +439,18 @@
                 showAlert(result.error, "error");
             }
         });
+
+        document.getElementById("findNfzVisits").addEventListener("click", () => {
+            const loadingDiv = document.getElementById("loadingAnimation");
+            loadingDiv.style.display = "block"; // Wyświetl animację
+
+            // Symulacja wyszukiwania wizyt przez 30 sekund
+            setTimeout(() => {
+                 loadingDiv.style.display = "none"; // Ukryj animację po zakończeniu wyszukiwania
+                showAlert("Idź prywatnie", "error");
+                }, 30000);
+});
+
 
         // Initial fetch
         fetchPatients();
