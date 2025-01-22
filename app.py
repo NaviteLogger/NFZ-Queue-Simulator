@@ -29,6 +29,11 @@ def index():
         return file.read()
 
 
+@app.route('/api/random-patient', methods=['GET'])
+def get_random_patient():
+    """Return a random patient's data so that the user does not have to fill everything in."""
+
+
 @app.route('/api/queue/length', methods=['GET'])
 def get_queue_length():
     """Return the length of the queue."""
