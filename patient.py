@@ -195,6 +195,7 @@ class PatientQueue:
         def _heapify_min_for_display(array, n, i):
             """
             Funkcja odpowiedzialna za tworzenie kopca minimalnego.
+            :param array: To tablica, którą będziemy sortować.
             :param n: To długość danych wejściowych, z jakiej będzie zrobiony kopiec.
             :param i: To miejsce, od którego przywracamy porządek kopca minimalnego.
             """
