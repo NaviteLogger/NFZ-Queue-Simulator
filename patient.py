@@ -192,14 +192,6 @@ class PatientQueue:
         :return: Zwraca posortowaną tablicę pacjentów
         """
 
-        def _build_heap_for_display(array):
-            """
-            Buduje kopiec minimalny z listy.
-            """
-            n = len(array)
-            for i in range(n // 2 - 1, -1, -1):
-                _heapify_min_for_display(array,n, i)
-
         def _heapify_min_for_display(array, n, i):
             """
             Funkcja odpowiedzialna za tworzenie kopca minimalnego.
@@ -216,7 +208,7 @@ class PatientQueue:
                 smallest = right_child
             if smallest != i:
                 array[i], array[smallest] = array[smallest], array[i]
-                _heapify_min_for_display(array,len(array), smallest)
+                _heapify_min_for_display(array, len(array), smallest)
 
         if len(self.heap) == 0:
             raise Exception("Kolejka jest pusta")
@@ -227,7 +219,7 @@ class PatientQueue:
             while temp_heap:
                 temp_heap[0], temp_heap[-1] = temp_heap[-1], temp_heap[0]
                 sorted_patients.append(temp_heap.pop())
-                _heapify_min_for_display(temp_heap,len(temp_heap),0)
+                _heapify_min_for_display(temp_heap, len(temp_heap), 0)
 
             return sorted_patients
 
