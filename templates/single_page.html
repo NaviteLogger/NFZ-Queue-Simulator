@@ -8,36 +8,81 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-
-        h1 {
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
             color: #333;
         }
 
         .container {
             max-width: 800px;
-            margin: auto;
+            margin: 40px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #007bff;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h2 {
+            color: #333;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 10px;
         }
 
         form {
+            display: none;
             margin-bottom: 20px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+
+        form.active {
+            display: block;
         }
 
         form div {
-            margin-bottom: 10px;
+            margin-bottom: 15px;
         }
 
         label {
             display: inline-block;
-            width: 120px;
+            width: 150px;
+            font-weight: bold;
         }
 
         input,
         select,
         button {
-            padding: 5px;
+            padding: 8px;
             font-size: 14px;
+            width: calc(100% - 160px);
+            max-width: 400px;
+            box-sizing: border-box;
+            margin-left: 10px;
+            border-radius: 8px;
+        }
+
+        button {
+            width: auto;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
         }
 
         ul {
@@ -49,21 +94,75 @@
             margin: 10px 0;
             padding: 10px;
             border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
         }
 
-        .error,
-        .success {
+        .menu {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .menu button {
+            padding: 10px 20px;
+            margin: 0 10px;
+            font-size: 16px;
+            background-color: #007bff;
             color: white;
-            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .menu button:hover {
+            background-color: #0056b3;
+        }
+
+        .menu button.active {
+            background-color: #0056b3;
+            cursor: default;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
             margin-bottom: 20px;
         }
 
         .error {
+            font-size:15px;
+            text-align: center;
             background-color: #f44336;
+            color: white;
+            border-radius: 8px;
         }
 
         .success {
+            font-size:15px;
+            text-align: center;
             background-color: #4caf50;
+            color: white;
+            border-radius: 8px;
+        }
+
+        .queue-container {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+
+        .queue-container h2 {
+            border: none;
+        }
+
+        .queue-container button {
+            display: block;
+            margin: 20px auto 0;
         }
     </style>
 </head>
@@ -71,10 +170,17 @@
 <body>
     <div class="container">
         <h1>Patient Queue Management</h1>
-        <div id="alerts"></div>
 
-        <h2>Add New Patient</h2>
-        <form id="addPatientForm">
+
+        <!-- Menu -->
+        <div class="menu">
+            <button id="addMenuButton" class="active" onclick="showForm('addPatientForm')">Add New Patient</button>
+            <button id="insertMenuButton" onclick="showForm('insertPatientForm')">Insert Patient</button>
+        </div>
+        <div id="alerts"></div>
+        <!-- Add New Patient Form -->
+        <form id="addPatientForm" class="active">
+            <h2>Add New Patient</h2>
             <div>
                 <label for="name">Imię:</label>
                 <input type="text" id="name" required>
@@ -85,7 +191,7 @@
             </div>
             <div>
                 <label for="age">Wiek:</label>
-                <input type="number" id="age" required>
+                <input type="number" id="age" required min="1">
             </div>
             <div>
                 <label for="pesel">PESEL:</label>
@@ -105,12 +211,9 @@
             <button type="submit">Add Patient</button>
         </form>
 
-        <h2>Patient Queue</h2>
-        <ul id="patientQueue"></ul>
-        <button id="removePatient">Remove Next Patient</button>
-
-        <h2>Insert Patient at Specific Position</h2>
+        <!-- Insert Patient Form -->
         <form id="insertPatientForm">
+            <h2>Insert Patient at Specific Position</h2>
             <div>
                 <label for="insert_name">Imię:</label>
                 <input type="text" id="insert_name" required>
@@ -121,7 +224,7 @@
             </div>
             <div>
                 <label for="insert_age">Wiek:</label>
-                <input type="number" id="insert_age" required>
+                <input type="number" id="insert_age" required min="1">
             </div>
             <div>
                 <label for="insert_pesel">PESEL:</label>
@@ -141,11 +244,33 @@
             <button type="submit">Insert Patient</button>
         </form>
 
+        <!-- Patient Queue -->
+        <div class="queue-container">
+            <h2>Patient Queue</h2>
+            <ul id="patientQueue"></ul>
+            <button id="removePatient">Remove Next Patient</button>
+        </div>
     </div>
 
-
     <script>
-        const alerts = document.getElementById("alerts");
+        function showForm(formId) {
+            // Ukryj wszystkie formularze
+            document.querySelectorAll("form").forEach(form => form.classList.remove("active"));
+
+            // Pokaż wybrany formularz
+            document.getElementById(formId).classList.add("active");
+
+            // Deaktywuj wszystkie przyciski w menu
+            document.querySelectorAll(".menu button").forEach(button => button.classList.remove("active"));
+
+            // Aktywuj odpowiedni przycisk w menu
+            if (formId === "addPatientForm") {
+                document.getElementById("addMenuButton").classList.add("active");
+            } else if (formId === "insertPatientForm") {
+                document.getElementById("insertMenuButton").classList.add("active");
+            }
+        }
+         const alerts = document.getElementById("alerts");
         const patientQueue = document.getElementById("patientQueue");
 
         // Display an alert
