@@ -54,12 +54,14 @@ class Patient:
 
         # Walidacja PESEL
         if not isinstance(pesel, int) or len(str(pesel)) != 11:
-            raise ValueError("PESEL musi być liczbą całkowitą składającą się z 11 cyfr.")
+            raise ValueError(
+                "PESEL musi być liczbą całkowitą składającą się z 11 cyfr.")
         self.pesel = pesel
 
         # Walidacja płci
         if not isinstance(gender, Gender):
-            raise ValueError("Płeć musi być wartością Gender Enum: 'Kobieta' lub 'Mężczyzna'.")
+            raise ValueError(
+                "Płeć musi być wartością Gender Enum: 'Kobieta' lub 'Mężczyzna'.")
         self.gender = gender
 
         # Czas wizyty (może być None)
@@ -110,21 +112,25 @@ class PatientQueue:
         :return: Zwraca true, kiedy żaden inny pacjent nie ma takiego samego numeru PESEL i kiedy odstęp od poprzedniej wizyty jest przynajmniej 10 minut.
         """
         if len(self.heap) > 0:
-            if patient.time_of_visit is not  None:
+            if patient.time_of_visit is not None:
                 for patient_in_queue in self.heap:
                     if patient_in_queue.pesel == patient.pesel:
-                        raise ValueError("Jest w kolejce pacjent o podanym numerze PESEL")
+                        raise ValueError(
+                            "Jest w kolejce pacjent o podanym numerze PESEL")
                     elif abs(patient_in_queue.time_of_visit - patient.time_of_visit) < timedelta(minutes=10):
-                        raise ValueError("Odstęp pomiędzy umówionymi wizytami to minimum 10 minut")
+                        raise ValueError(
+                            "Odstęp pomiędzy umówionymi wizytami to minimum 10 minut")
                 return True
             else:
                 for patient_in_queue in self.heap:
                     if patient_in_queue.pesel == patient.pesel:
-                        raise ValueError("Jest w kolejce pacjent o podanym numerze PESEL")
+                        raise ValueError(
+                            "Jest w kolejce pacjent o podanym numerze PESEL")
                 return True
         elif patient is not None:
             return True
-        else: return False
+        else:
+            return False
 
     def add_patient(self, patient):
         """
@@ -238,6 +244,7 @@ class PatientQueue:
             logging.info("Nie ma pacjenta, którego można usunąć")
         else:
             self.heap.pop(position)
+            self._build_heap()  # Przywrócenie porządku kopca
 
     def waiting_inline(self):
         """

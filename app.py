@@ -16,9 +16,13 @@ test_patient_3 = Patient("Piotr", "Wiśniewski", 60, 11223344559,
                          Gender.M, datetime.strptime("11:00", "%H:%M"))
 test_patient_4 = Patient("Katarzyna", "Dąbrowska", 25,
                          99887766544, Gender.K, datetime.strptime("11:30", "%H:%M"))
+test_patient_5 = Patient("Marek", "Zieliński", 35, 11223346559,
+                         Gender.M, datetime.strptime("12:00", "%H:%M"))
+test_patient_6 = Patient("Joanna", "Kowalska", 55, 99886766544,
+                         Gender.K, datetime.strptime("12:30", "%H:%M"))
 
 test_patients = [test_patient_1, test_patient_2,
-                 test_patient_3, test_patient_4]
+                 test_patient_3, test_patient_4, test_patient_5, test_patient_6]
 for patient in test_patients:
     queue.add_patient(patient)
 
@@ -129,7 +133,7 @@ def insert_patient():
         return jsonify({"error": str(e)}), 400
 
 
-@ app.route('/api/patient', methods=['DELETE'])
+@app.route('/api/patient/next', methods=['DELETE'])
 def remove_patient():
     """Remove the next patient from the queue."""
     if queue.is_empty():
@@ -141,6 +145,19 @@ def remove_patient():
             "name": patient.name,
             "surname": patient.surname
         }
+    }), 200
+
+
+@app.route('/api/patient/<int:index>', methods=['DELETE'])
+def delete_patient_by_index(index):
+    """Delete a patient by index."""
+    if index < 0 or index >= len(queue.heap):
+        return jsonify({"error": "Invalid index."}), 400
+
+    # Assuming this method removes the patient
+    queue.remove_patient(index-1)
+    return jsonify({
+        "message": "Patient removed successfully!",
     }), 200
 
 

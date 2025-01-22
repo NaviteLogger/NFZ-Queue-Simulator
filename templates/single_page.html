@@ -252,6 +252,11 @@
             <h2>Patient Queue</h2>
             <ul id="patientQueue"></ul>
             <button id="removePatient">Remove Next Patient</button>
+            <div>
+                <button id="removePatientByIndex">Remove Patient by Index</button>
+                <label for="removePatientIndex">Index:</label>
+                <input type="number" id="removePatientIndex" min="1" placeholder="Index">
+            </div>
         </div>
     </div>
 
@@ -368,7 +373,20 @@
 
         // Remove the next patient
         document.getElementById("removePatient").addEventListener("click", async () => {
-            const response = await fetch('/api/patient', { method: 'DELETE' });
+            const response = await fetch('/api/patient/next', { method: 'DELETE' });
+            const result = await response.json();
+            if (response.ok) {
+                showAlert(result.message, "success");
+                fetchPatients();
+            } else {
+                showAlert(result.error, "error");
+            }
+        });
+
+        // Remove a patient by index
+        document.getElementById("removePatientByIndex").addEventListener("click", async () => {
+            const index = document.getElementById("removePatientIndex").value;
+            const response = await fetch(`/api/patient/${index}`, { method: 'DELETE' });
             const result = await response.json();
             if (response.ok) {
                 showAlert(result.message, "success");
