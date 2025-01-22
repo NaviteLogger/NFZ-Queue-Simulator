@@ -210,9 +210,6 @@
             </div>
             <button type="submit">Add Patient</button>
         </form>
-        <div>
-            <button id="randomPatientDatae">Random Patient Data</button>
-        </div>
 
         <!-- Insert Patient Form -->
         <form id="insertPatientForm">
@@ -247,6 +244,12 @@
             <button type="submit">Insert Patient</button>
         </form>
 
+        <div>
+            <button id="randomPatientData">Random Patient Data</button>
+        </div>
+        <div>
+            <button id="randomInsertPatientData">Random Insert Patient Data</button>
+        </div>
         <!-- Patient Queue -->
         <div class="queue-container">
             <h2>Patient Queue</h2>
@@ -301,7 +304,7 @@
         }
 
         // Random patient data
-        document.getElementById("randomPatientDatae").addEventListener("click", async () => {
+        document.getElementById("randomPatientData").addEventListener("click", async () => {
             const response = await fetch('/api/random-patient');
             const data = await response.json();
             const patient = data;
@@ -311,6 +314,18 @@
             document.getElementById("gender").value = patient.gender;
             document.getElementById("pesel").value = patient.pesel;
             document.getElementById("time_of_visit").value = patient.time_of_visit;
+        });
+
+        document.getElementById("randomInsertPatientData").addEventListener("click", async () => {
+            const response = await fetch('/api/random-patient');
+            const data = await response.json();
+            const patient = data;
+            document.getElementById("insert_name").value = patient.name;
+            document.getElementById("insert_surname").value = patient.surname;
+            document.getElementById("insert_age").value = patient.age;
+            document.getElementById("insert_gender").value = patient.gender;
+            document.getElementById("insert_pesel").value = patient.pesel;
+            document.getElementById("insert_time_of_visit").value = patient.time_of_visit;
         });
 
         // Add a new patient

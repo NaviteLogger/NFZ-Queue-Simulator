@@ -174,9 +174,9 @@ class PatientQueue:
         :param n: To długość danych wejściowych, z jakiej będzie zrobiony kopiec.
         :param i: To miejsce, od którego przywracamy porządek kopca minimalnego.
         """
-        smallest = i  # indeks najmniejszego elementu, na początku 0
-        left_child = 2 * i + 1  # lewy potomek, badanego węzła
-        right_child = 2 * i + 2  # prawy potomek, badanego węzła
+        smallest: int = i  # indeks najmniejszego elementu, na początku 0
+        left_child: int = 2 * i + 1  # lewy potomek, badanego węzła
+        right_child: int = 2 * i + 2  # prawy potomek, badanego węzła
 
         if left_child < n and self.heap[left_child].time_of_visit < self.heap[smallest].time_of_visit:
             smallest = left_child

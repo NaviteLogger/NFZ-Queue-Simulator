@@ -26,6 +26,8 @@ test_patients = [test_patient_1, test_patient_2,
 for patient in test_patients:
     queue.add_patient(patient)
 
+queue._build_heap()
+
 patients_names = ['Marek', 'Marek', 'Piotr', 'Piotr', 'Katarzyna', 'Adam', 'Anna', 'Maria', 'Adam',
                   'Katarzyna', 'Joanna', 'Joanna', 'Katarzyna', 'Katarzyna', 'Ewa', 'Ewa', 'Adam', 'Anna', 'Adam', 'Anna']
 patients_surnames = ['Lewandowski', 'Kowalski', 'Wiśniewski', 'Kowalski', 'Lewandowski', 'Lewandowski', 'Szymańska', 'Nowak', 'Nowak',
@@ -78,7 +80,8 @@ def get_patients():
         "pesel": p.pesel,
         "gender": p.gender.value,
         "time_of_visit": p.time_of_visit.strftime('%H:%M'),
-    } for i, p in enumerate(queue.heap)]
+    } for i, p in enumerate(queue.display_queue())]
+    print(patients)
     return jsonify(patients)
 
 
