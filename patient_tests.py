@@ -100,9 +100,9 @@ class TestPatientQueue(unittest.TestCase):
         """
         Test wyświetlania pustej kolejki.
         """
-        with self.assertLogs(level="INFO") as log:
+        with self.assertRaises(Exception) as context:
             self.queue.display_queue()
-            self.assertIn("Kolejka jest pusta", log.output[-1])
+        self.assertEqual(str(context.exception), "Kolejka jest pusta")
 
 
 if __name__ == "__main__":
