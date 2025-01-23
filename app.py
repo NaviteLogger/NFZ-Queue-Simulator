@@ -20,9 +20,17 @@ test_patient_5 = Patient("Marek", "Zieliński", 35, 11223346559,
                          Gender.M, datetime.strptime("12:00", "%H:%M"))
 test_patient_6 = Patient("Joanna", "Kowalska", 55, 99886766544,
                          Gender.K, datetime.strptime("12:30", "%H:%M"))
+test_patient_7 = Patient("Adam", "Nowak", 42, 55555555555,
+                         Gender.M, datetime.strptime("13:00", "%H:%M"))
+test_patient_8 = Patient("Anna", "Szymańska", 62, 66666666666,
+                         Gender.K, datetime.strptime("13:30", "%H:%M"))
+test_patient_9 = Patient("Maria", "Nowak", 37, 77777777777,
+                         Gender.K, datetime.strptime("14:00", "%H:%M"))
+test_patient_10 = Patient("Adam", "Jankowski", 69, 88888888888,
+                          Gender.M, datetime.strptime("14:30", "%H:%M"))
 
 test_patients = [test_patient_1, test_patient_2,
-                 test_patient_3, test_patient_4, test_patient_5, test_patient_6]
+                 test_patient_3, test_patient_4, test_patient_5, test_patient_6, test_patient_7, test_patient_8, test_patient_9, test_patient_10]
 for patient in test_patients:
     queue.add_patient(patient)
 
