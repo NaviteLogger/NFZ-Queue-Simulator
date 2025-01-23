@@ -154,7 +154,7 @@ def remove_patient():
 @app.route('/api/patient/<int:index>', methods=['DELETE'])
 def delete_patient_by_index(index):
     """Delete a patient by index."""
-    if index < 0 or index >= len(queue.heap):
+    if index < 0 or index > len(queue.heap):
         return jsonify({"error": "Invalid index."}), 400
 
     # Assuming this method removes the patient
